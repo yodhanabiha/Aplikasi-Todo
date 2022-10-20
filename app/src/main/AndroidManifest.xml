@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.tryapp">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_task"
+        android:label="ToDo"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TryApp">
+        <activity
+            android:name=".activity.AllActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.EditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.BaseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.HomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

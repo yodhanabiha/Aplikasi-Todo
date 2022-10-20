@@ -1,0 +1,150 @@
+<html>
+<head>
+<title>HomeFragment.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+HomeFragment.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.tryapp.fragment</span>
+<span class="s1">import android.content.Intent</span>
+<span class="s1">import android.os.Bundle</span>
+<span class="s1">import android.util.Log</span>
+<span class="s1">import android.view.*</span>
+<span class="s1">import android.widget.ArrayAdapter</span>
+<span class="s1">import androidx.fragment.app.Fragment</span>
+<span class="s1">import android.widget.Switch</span>
+<span class="s1">import android.widget.Toast</span>
+<span class="s1">import androidx.core.view.isGone</span>
+<span class="s1">import androidx.navigation.fragment.findNavController</span>
+<span class="s1">import com.example.tryapp.R</span>
+<span class="s1">import com.example.tryapp.activity.AllActivity</span>
+<span class="s1">import com.example.tryapp.activity.EditActivity</span>
+<span class="s1">import com.example.tryapp.adapter.TaskAdapter</span>
+<span class="s1">import com.example.tryapp.adapter.TaskAdapterComplete</span>
+<span class="s1">import com.example.tryapp.database.DatabaseClient</span>
+<span class="s1">import com.example.tryapp.database.TaskDAO</span>
+<span class="s1">import com.example.tryapp.database.TaskModel</span>
+<span class="s1">import com.example.tryapp.databinding.FragmentHomeBinding</span>
+<span class="s1">import com.example.tryapp.util.TimeNow</span>
+<span class="s1">import com.example.tryapp.util.dateToLong</span>
+<span class="s1">import com.example.tryapp.util.dateToday</span>
+<span class="s1">import com.example.tryapp.util.timeToLong</span>
+<span class="s1">import java.text.SimpleDateFormat</span>
+<span class="s1">import java.util.*</span>
+
+<span class="s0">class </span><span class="s1">HomeFragment : Fragment() {</span>
+
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">binding: FragmentHomeBinding</span>
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">database: TaskDAO</span>
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">taskSelected: TaskModel</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onCreateView(</span>
+        <span class="s1">inflater: LayoutInflater</span><span class="s0">, </span><span class="s1">container: ViewGroup?</span><span class="s0">,</span>
+        <span class="s1">savedInstanceState: Bundle?</span>
+    <span class="s1">): View? {</span>
+        <span class="s1">binding = FragmentHomeBinding.inflate(inflater</span><span class="s0">, </span><span class="s1">container</span><span class="s0">,false</span><span class="s1">)</span>
+        <span class="s1">database = DatabaseClient.getService(requireActivity()).taskDAO()</span>
+        <span class="s0">return </span><span class="s1">binding.root</span>
+    <span class="s1">}</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onViewCreated(view: View</span><span class="s0">, </span><span class="s1">savedInstanceState: Bundle?) {</span>
+        <span class="s1">binding.textDate.text = dateToday()</span>
+        <span class="s0">val </span><span class="s1">cal : Date = Calendar.getInstance().time</span>
+        <span class="s0">val </span><span class="s1">formatter = SimpleDateFormat(</span><span class="s2">&quot;EEEE,   &quot;</span><span class="s1">)</span>
+        <span class="s0">val </span><span class="s1">formatdate = formatter.format(cal)</span>
+        <span class="s1">binding.textDay.text = formatdate</span>
+        <span class="s0">super</span><span class="s1">.onViewCreated(view</span><span class="s0">, </span><span class="s1">savedInstanceState)</span>
+        <span class="s1">setupList()</span>
+        <span class="s1">setupListener()</span>
+        <span class="s1">setupData()</span>
+    <span class="s1">}</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onStart() {</span>
+        <span class="s0">super</span><span class="s1">.onStart()</span>
+       <span class="s1">setupData()</span>
+    <span class="s1">}</span>
+    <span class="s1">private </span><span class="s0">fun </span><span class="s1">setupList(){</span>
+        <span class="s1">binding.todoTask.adapter = taskAdapter</span>
+        <span class="s1">binding.todoTaskCompleted.adapter = taskAdapterComplete</span>
+    <span class="s1">}</span>
+    <span class="s1">private </span><span class="s0">fun </span><span class="s1">setupListener(){</span>
+        <span class="s1">binding.labelSelesai.setOnClickListener {</span>
+            <span class="s0">if</span><span class="s1">(binding.todoTaskCompleted.visibility == View.GONE){</span>
+                <span class="s1">binding.todoTaskCompleted.visibility = View.VISIBLE</span>
+                <span class="s1">binding.imageDone.setImageResource(R.drawable.ic_arrow_down)</span>
+            <span class="s1">}</span><span class="s0">else</span><span class="s1">{</span>
+                <span class="s1">binding.todoTaskCompleted.visibility = View.GONE</span>
+                <span class="s1">binding.imageDone.setImageResource(R.drawable.ic_arrow_right)</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s1">binding.buttonTask.setOnClickListener{</span>
+            <span class="s1">findNavController().navigate(R.id.action_homeFragment_to_addFragment)</span>
+            <span class="s3">//testInsert()</span>
+        <span class="s1">}</span>
+        <span class="s1">binding.allTask.setOnClickListener {</span>
+            <span class="s1">startActivity(Intent(requireActivity()</span><span class="s0">, </span><span class="s1">AllActivity::</span><span class="s0">class</span><span class="s1">.java))</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s1">private </span><span class="s0">fun </span><span class="s1">setupData(){</span>
+        <span class="s1">database.taskAll(</span>
+            <span class="s1">completed = </span><span class="s0">false,</span>
+            <span class="s1">date = dateToLong(dateToday())</span><span class="s0">,</span>
+        <span class="s1">).observe(viewLifecycleOwner</span><span class="s0">,</span><span class="s1">{</span>
+            <span class="s1">Log.e(</span><span class="s2">&quot;taskAll&quot;</span><span class="s0">,</span><span class="s1">it.toString())</span>
+            <span class="s1">taskAdapter.addList(it)</span>
+            <span class="s1">binding.labelAlert.visibility = </span><span class="s0">if</span><span class="s1">(it.isEmpty()) View.VISIBLE </span><span class="s0">else </span><span class="s1">View.GONE</span>
+        <span class="s1">})</span>
+        <span class="s1">database.taskAll(</span>
+            <span class="s1">completed = </span><span class="s0">true,</span>
+            <span class="s1">date = dateToLong(dateToday())</span><span class="s0">,</span>
+        <span class="s1">).observe(viewLifecycleOwner</span><span class="s0">,</span><span class="s1">{</span>
+            <span class="s1">Log.e(</span><span class="s2">&quot;taskAllCompleted&quot;</span><span class="s0">,</span><span class="s1">it.toString())</span>
+            <span class="s1">taskAdapterComplete.addList(it)</span>
+            <span class="s1">binding.imageDone.visibility = </span><span class="s0">if</span><span class="s1">(it.isEmpty()) View.GONE </span><span class="s0">else </span><span class="s1">View.VISIBLE</span>
+            <span class="s1">binding.labelSelesai.visibility = </span><span class="s0">if</span><span class="s1">(it.isEmpty()) View.GONE </span><span class="s0">else </span><span class="s1">View.VISIBLE</span>
+        <span class="s1">})</span>
+    <span class="s1">}</span>
+
+    <span class="s1">private </span><span class="s0">val </span><span class="s1">taskAdapter by lazy {</span>
+        <span class="s1">TaskAdapter(arrayListOf()</span><span class="s0">,object </span><span class="s1">: TaskAdapter.AdapterListener{</span>
+            <span class="s1">override </span><span class="s0">fun </span><span class="s1">onUpdate(taskModel: TaskModel) {</span>
+                <span class="s1">taskSelected = taskModel</span>
+                <span class="s1">taskSelected.completed = </span><span class="s0">true</span>
+                <span class="s1">Thread{database.update(taskSelected)}.start()</span>
+
+            <span class="s1">}</span>
+            <span class="s1">override </span><span class="s0">fun </span><span class="s1">onDetail(taskModel: TaskModel) {</span>
+                <span class="s1">startActivity(</span>
+                    <span class="s1">Intent(requireActivity()</span><span class="s0">,</span><span class="s1">EditActivity::</span><span class="s0">class</span><span class="s1">.java)</span>
+                        <span class="s1">.putExtra(</span><span class="s2">&quot;intent_task&quot;</span><span class="s0">,</span><span class="s1">taskModel)</span>
+                <span class="s1">)</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span>
+    <span class="s1">}</span>
+
+    <span class="s1">private </span><span class="s0">val </span><span class="s1">taskAdapterComplete by lazy {</span>
+        <span class="s1">TaskAdapterComplete(arrayListOf()</span><span class="s0">,object </span><span class="s1">: TaskAdapterComplete.AdapterListener{</span>
+            <span class="s1">override </span><span class="s0">fun </span><span class="s1">onClick(taskModel: TaskModel) {</span>
+                <span class="s1">taskSelected = taskModel</span>
+                <span class="s1">taskSelected.completed = </span><span class="s0">false</span>
+                <span class="s1">Thread{database.update(taskSelected)}.start()</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span>
+    <span class="s1">}</span>
+
+
+
+
+<span class="s1">}</span></pre>
+</body>
+</html>

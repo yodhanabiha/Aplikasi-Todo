@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>AddFragment.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+AddFragment.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.tryapp.fragment</span>
+
+<span class="s1">import android.app.DatePickerDialog</span>
+<span class="s1">import android.app.TimePickerDialog</span>
+<span class="s1">import android.os.Build</span>
+<span class="s1">import android.os.Bundle</span>
+<span class="s1">import androidx.fragment.app.Fragment</span>
+<span class="s1">import android.view.LayoutInflater</span>
+<span class="s1">import android.view.View</span>
+<span class="s1">import android.view.ViewGroup</span>
+<span class="s1">import android.widget.Toast</span>
+<span class="s1">import androidx.annotation.RequiresApi</span>
+<span class="s1">import androidx.navigation.fragment.findNavController</span>
+<span class="s1">import com.example.tryapp.database.DatabaseClient</span>
+<span class="s1">import com.example.tryapp.database.TaskDAO</span>
+<span class="s1">import com.example.tryapp.database.TaskModel</span>
+<span class="s1">import com.example.tryapp.databinding.FragmentAddBinding</span>
+<span class="s1">import com.example.tryapp.util.*</span>
+
+
+<span class="s0">class </span><span class="s1">AddFragment : Fragment() {</span>
+
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">binding: FragmentAddBinding</span>
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">database: TaskDAO</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onCreateView(</span>
+        <span class="s1">inflater: LayoutInflater</span><span class="s0">, </span><span class="s1">container: ViewGroup?</span><span class="s0">,</span>
+        <span class="s1">savedInstanceState: Bundle?</span>
+    <span class="s1">): View? {</span>
+        <span class="s1">binding = FragmentAddBinding.inflate(inflater</span><span class="s0">,</span><span class="s1">container</span><span class="s0">,false</span><span class="s1">)</span>
+        <span class="s1">database = DatabaseClient.getService(requireActivity()).taskDAO()</span>
+        <span class="s0">return </span><span class="s1">binding.root</span>
+    <span class="s1">}</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onViewCreated(view: View</span><span class="s0">, </span><span class="s1">savedInstanceState: Bundle?) {</span>
+        <span class="s0">super</span><span class="s1">.onViewCreated(view</span><span class="s0">, </span><span class="s1">savedInstanceState)</span>
+
+        <span class="s1">binding.courseDate.text = dateToday()</span>
+        <span class="s1">binding.courseTime.text = TimeNow()</span>
+
+        <span class="s1">binding.courseAddDate.setOnClickListener {</span>
+            <span class="s0">val </span><span class="s1">datepicker = DatePickerDialog.OnDateSetListener{view</span><span class="s0">,</span><span class="s1">year</span><span class="s0">,</span><span class="s1">month</span><span class="s0">,</span><span class="s1">dayofmonth -&gt;</span>
+                <span class="s1">binding.courseDate.text = dateTostring(year</span><span class="s0">,</span><span class="s1">month</span><span class="s0">,</span><span class="s1">dayofmonth)</span>
+            <span class="s1">}</span>
+            <span class="s1">dateToDialog(requireActivity()</span><span class="s0">,</span><span class="s1">datepicker).show()</span>
+        <span class="s1">}</span>
+
+        <span class="s1">binding.courseAddTime.setOnClickListener {</span>
+            <span class="s0">val </span><span class="s1">timepicker = TimePickerDialog.OnTimeSetListener { view</span><span class="s0">, </span><span class="s1">hour</span><span class="s0">, </span><span class="s1">minute -&gt;</span>
+                <span class="s1">binding.courseTime.text = timeTostring(hour</span><span class="s0">,</span><span class="s1">minute)</span>
+            <span class="s1">}</span>
+            <span class="s1">timetoDialog(requireActivity()</span><span class="s0">,</span><span class="s1">timepicker).show()</span>
+        <span class="s1">}</span>
+
+        <span class="s1">binding.courseButton.setOnClickListener{</span>
+            <span class="s0">val </span><span class="s1">task = TaskModel(</span><span class="s2">0</span><span class="s0">,</span>
+                <span class="s1">binding.courseText.text.toString()</span><span class="s0">,</span>
+                <span class="s0">false,</span>
+                <span class="s1">dateToLong(binding.courseDate.text.toString())</span><span class="s0">,</span>
+                <span class="s1">timeToLong(binding.courseTime.text.toString())</span><span class="s0">,</span>
+            <span class="s1">)</span>
+            <span class="s1">Thread{</span>
+                <span class="s1">database.insert(task)</span>
+                <span class="s1">requireActivity().runOnUiThread{</span>
+                    <span class="s1">Toast.makeText(requireActivity()</span><span class="s0">, </span><span class="s3">&quot;Task Saved&quot;</span><span class="s0">, </span><span class="s1">Toast.LENGTH_SHORT).show()</span>
+                    <span class="s1">findNavController().navigateUp()</span>
+                <span class="s1">}</span>
+            <span class="s1">}.start()</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+
+
+<span class="s1">}</span></pre>
+</body>
+</html>

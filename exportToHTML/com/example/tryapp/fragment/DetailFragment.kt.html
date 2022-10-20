@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>DetailFragment.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+DetailFragment.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.tryapp.fragment</span>
+
+<span class="s1">import android.os.Bundle</span>
+<span class="s1">import androidx.fragment.app.Fragment</span>
+<span class="s1">import android.view.LayoutInflater</span>
+<span class="s1">import android.view.View</span>
+<span class="s1">import android.view.ViewGroup</span>
+<span class="s1">import androidx.core.os.bundleOf</span>
+<span class="s1">import androidx.navigation.fragment.findNavController</span>
+<span class="s1">import com.example.tryapp.R</span>
+<span class="s1">import com.example.tryapp.database.TaskModel</span>
+<span class="s1">import com.example.tryapp.databinding.FragmentDetailBinding</span>
+<span class="s1">import com.example.tryapp.util.dateTostring</span>
+<span class="s1">import com.example.tryapp.util.timeTostring</span>
+
+<span class="s0">class </span><span class="s1">DetailFragment : Fragment() {</span>
+
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">binding: FragmentDetailBinding</span>
+    <span class="s1">private lateinit </span><span class="s0">var </span><span class="s1">detail: TaskModel</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onCreateView(</span>
+        <span class="s1">inflater: LayoutInflater</span><span class="s0">, </span><span class="s1">container: ViewGroup?</span><span class="s0">,</span>
+        <span class="s1">savedInstanceState: Bundle?</span>
+    <span class="s1">): View? {</span>
+        <span class="s1">binding = FragmentDetailBinding.inflate(inflater</span><span class="s0">,</span><span class="s1">container</span><span class="s0">,false</span><span class="s1">)</span>
+        <span class="s1">detail = requireActivity().intent.getSerializableExtra(</span><span class="s2">&quot;intent_task&quot;</span><span class="s1">) </span><span class="s0">as </span><span class="s1">TaskModel</span>
+        <span class="s0">return </span><span class="s1">binding.root</span>
+    <span class="s1">}</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onViewCreated(view: View</span><span class="s0">, </span><span class="s1">savedInstanceState: Bundle?) {</span>
+        <span class="s0">super</span><span class="s1">.onViewCreated(view</span><span class="s0">, </span><span class="s1">savedInstanceState)</span>
+        <span class="s1">binding.course.text = detail.task</span>
+        <span class="s1">binding.courseAddDate.text = dateTostring(detail.date)</span>
+        <span class="s1">binding.courseAddTime.text = timeTostring(detail.time)</span>
+
+        <span class="s1">binding.imgEdit.setOnClickListener {</span>
+            <span class="s1">findNavController().navigate(R.id.action_detailFragment_to_updateFragment</span><span class="s0">,</span>
+            <span class="s1">bundleOf(</span><span class="s2">&quot;argument_task&quot; </span><span class="s1">to detail))</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+</pre>
+</body>
+</html>
